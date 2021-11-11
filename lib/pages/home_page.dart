@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:new_app/drawer.dart';
-import 'package:new_app/material_card_widget.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class HomePage extends StatefulWidget {
   @override
@@ -8,8 +9,30 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  var changeText = "Change My Name";
-  TextEditingController _nameContrller = TextEditingController();
+  // var changeText = "Change My Name";
+  // TextEditingController _nameContrller = TextEditingController();
+
+  var url = "https://jsonplaceholder.typicode.com/photos";
+  var data;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  fetchData() async {
+    var res = await http.get(Uri.parse(url));
+    data = jsonDecode(res.body);
+    print(res.body);
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,21 +40,21 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text("ghenimi"),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView(
-            child: NameCardWidget(
-                changeText: changeText, nameContrller: _nameContrller),
-          ),
-        ),
-      ),
+      body: data != null
+          ? ListView.builder(
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(data[index]["title"]),
+                  subtitle: Text("ID: ${data[index]["id"]}"),
+                  leading: Image.network(data[index]["url"]),
+                );
+              },
+              itemCount: data.length,
+            )
+          : Center(child: CircularProgressIndicator()),
       drawer: MyDrawer(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          changeText = _nameContrller.text;
-          setState(() {});
-        },
+        onPressed: () {},
         child: Icon(Icons.send),
       ),
     );
